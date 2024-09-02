@@ -1,24 +1,19 @@
 FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm
-
-# set version label
-ARG BUILD_DATE
-ARG VERSION
-LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="thelamer"
-
+ARG THORIUM_DEB_URL
 # title
-ENV TITLE=Chromium
+ENV TITLE=Thorium
 
 RUN \
   echo "**** add icon ****" && \
   curl -o \
     /kclient/public/icon.png \
     https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/chromium-logo.png && \
-  echo "**** install packages ****" && \
+  echo "**** install CJK fonts ****" && \
   apt-get update && \
-  apt-get install -y --no-install-recommends \
-    chromium \
-    chromium-l10n && \
+  apt-get install -y --no-install-recommends fonts-wqy-zenhei && \
+  echo "**** install Thorium ****" && \
+  curl -o /tmp/thorium.deb -sSLf $THORIUM_DEB_URL && \
+  dpkg -i /tmp/thorium.deb || apt-get -y --fix-broken --no-install-recommends install && \
   echo "**** cleanup ****" && \
   apt-get autoclean && \
   rm -rf \

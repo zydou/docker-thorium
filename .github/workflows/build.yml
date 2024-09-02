@@ -1,0 +1,43 @@
+---
+name: Build
+run-name: build ${{ inputs.url }}
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        required: true
+        description: thorium deb url
+        type: string
+
+permissions: write-all
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@master
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@master
+
+      - name: Login to DockerHub
+        uses: docker/login-action@master
+        with:
+          username: zydou
+          password: ${{ secrets.PAT }}
+
+      - name: Build
+        uses: docker/build-push-action@master
+        with:
+          file: Dockerfile
+          platforms: linux/amd64
+          build-args: THORIUM_DEB_URL=${{ inputs.url }}
+          push: true
+          tags: |
+            zydou/thorium:latest
